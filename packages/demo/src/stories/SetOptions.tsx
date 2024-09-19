@@ -97,6 +97,22 @@ const InputField = ({
   updateFn: UpdateFn
 }) => {
   switch (optionName) {
+    case 'decimalPlaces':
+      return (
+        <select
+          id={`input-${optionName}`}
+          className={optionsInput}
+          value={value as string}
+          onChange={(e) => {
+            const value = Number(e.target.value) as Options['decimalPlaces']
+            updateFn((p) => ({ ...p, [optionName]: value }))
+          }}
+        >
+          <option value={1}>1</option>
+          <option value={2}>2</option>
+          <option value={3}>3</option>
+        </select>
+      )
     case 'date':
     case 'minDate':
     case 'maxDate':

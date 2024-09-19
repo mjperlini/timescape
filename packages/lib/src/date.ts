@@ -50,6 +50,9 @@ export const add = (date: Date, type: DateType, amount: number) => {
     case 'seconds':
       newDate.setSeconds(newDate.getSeconds() + amount)
       break
+    case 'decimal':
+      newDate.setMilliseconds(newDate.getMilliseconds() + amount * 10)
+      break
   }
 
   return newDate
@@ -82,6 +85,9 @@ export const set = (date: Date, type: DateType, value: number) => {
     case 'seconds':
       newDate.setSeconds(value)
       break
+    case 'decimal':
+      newDate.setMilliseconds(value * 10)
+      break
     case 'am/pm':
       newDate.setHours(value)
       break
@@ -104,6 +110,8 @@ export const get = (date: Date, type: DateType) => {
       return date.getMinutes()
     case 'seconds':
       return date.getSeconds()
+    case 'decimal':
+      return Math.round(date.getMilliseconds() / 10)
     case 'am/pm':
       return date.getHours()
   }
@@ -145,6 +153,8 @@ export const format = (
       return String(date.getMinutes()).padStart(2, '0')
     case 'seconds':
       return String(date.getSeconds()).padStart(2, '0')
+    case 'decimal':
+      return String(Math.round(date.getMilliseconds() / 10)).padStart(2, '0')
     case 'am/pm':
       return date.getHours() < 12 ? 'AM' : 'PM'
   }

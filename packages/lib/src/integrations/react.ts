@@ -29,7 +29,7 @@ type ReactOptions = Options & {
 
 export type UpdateFn = Dispatch<SetStateAction<Options>>
 
-export const useTimescape = (options: ReactOptions = {}) => {
+export const useTimescape = (options: ReactOptions = { decimalPlaces: 2 }) => {
   const { date, onChangeDate, ...rest } = options
   const [manager] = useState(() => new TimescapeManager(date, rest))
   const onChangeDateRef = useRef(onChangeDate)
@@ -67,6 +67,7 @@ export const useTimescape = (options: ReactOptions = {}) => {
     manager.wrapAround = optionsState.wrapAround
     manager.digits = optionsState.digits
     manager.snapToStep = optionsState.snapToStep
+    manager.decimalPlaces = optionsState.decimalPlaces
   }, [
     manager,
     timestamp,
@@ -76,6 +77,7 @@ export const useTimescape = (options: ReactOptions = {}) => {
     optionsState.wrapAround,
     optionsState.digits,
     optionsState.snapToStep,
+    optionsState.decimalPlaces,
   ])
 
   return {

@@ -23,6 +23,7 @@ export type DateType =
   | 'hours'
   | 'minutes'
   | 'seconds'
+  | 'decimal'
   | 'am/pm'
 
 type RegistryEntry = {
@@ -46,6 +47,7 @@ export type Options = {
   digits?: 'numeric' | '2-digit'
   wrapAround?: boolean
   snapToStep?: boolean
+  decimalPlaces: number
 }
 
 export type RangeOptions = {
@@ -65,6 +67,7 @@ export class TimescapeManager implements Options {
   digits?: Options['digits'] = '2-digit'
   wrapAround?: Options['wrapAround'] = false
   snapToStep?: Options['snapToStep'] = false
+  decimalPlaces: Options['decimalPlaces'] = 2
 
   #instanceId = Math.random().toString(36).slice(2)
   #timestamp: number | undefined
@@ -131,6 +134,7 @@ export class TimescapeManager implements Options {
       this.hour12 = options.hour12
       this.digits = options.digits
       this.wrapAround = options.wrapAround
+      this.decimalPlaces = options.decimalPlaces
     }
 
     return new Proxy(this, {
@@ -333,9 +337,11 @@ export class TimescapeManager implements Options {
         : intermediateValue.padStart(
             type === 'minutes' || type === 'seconds'
               ? 2
-              : this.digits === '2-digit'
-                ? 2
-                : 1,
+              : type === 'decimal'
+                ? this.decimalPlaces
+                : this.digits === '2-digit'
+                  ? 2
+                  : 1,
             '0',
           )
       : this.#timestamp !== undefined
@@ -345,6 +351,7 @@ export class TimescapeManager implements Options {
 
   #wrapDateAround(step: number, type: DateType) {
     const ranges = {
+      decimal: Math.floor(9999 / Math.pow(10, this.decimalPlaces ?? 2)),
       seconds: 60,
       minutes: 60,
       hours: this.hour12 ? 12 : 24,
@@ -578,6 +585,23 @@ export class TimescapeManager implements Options {
               this.#focusNextField(type, 1, false)
             }
             break
+          case 'decimal':
+            if (this.#cursorPosition < this.decimalPlaces) {
+              // Append the new digit and shift the digits to the left
+              const newValue = intermediateValue + key
+              setIntermediateValue(newValue)
+              this.#cursorPosition += 1
+
+              // When we have 4 digits, update the actual year
+              if (this.#cursorPosition === this.decimalPlaces) {
+                setValue(
+                  type,
+                  Number(newValue) * Math.pow(10, 3 - this.decimalPlaces),
+                )
+                this.#focusNextField(type)
+              }
+            }
+            break
         }
         break
       default:
@@ -671,7 +695,9 @@ export class TimescapeManager implements Options {
                 ? 23
                 : type === 'minutes' || type === 'seconds'
                   ? 59
-                  : ''
+                  : type === 'decimal'
+                    ? Math.floor(9999 / Math.pow(10, this.decimalPlaces ?? 2))
+                    : ''
         ).toString(),
       )
     }
@@ -706,9 +732,9 @@ export class TimescapeManager implements Options {
       date = maxDate
     }
 
-    if (this.#timestamp && isSameSeconds(date.getTime(), this.#timestamp)) {
-      return
-    }
+    // if (this.#timestamp && isSameSeconds(date.getTime(), this.#timestamp)) {
+    //   return
+    // }
 
     this.#timestamp = date.getTime()
     this.#pubsub.emit('changeDate', date)

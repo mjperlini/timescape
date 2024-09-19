@@ -9,6 +9,7 @@ const App = () => {
     digits: '2-digit',
     wrapAround: false,
     snapToStep: false,
+    decimalPlaces: 2,
   })
 
   return (
@@ -19,12 +20,21 @@ const App = () => {
         <input className={input} {...getInputProps('minutes')} />
         <span className={separator}>:</span>
         <input className={input} {...getInputProps('seconds')} />
+        <span className={separator}>.</span>
+        <input className={input} {...getInputProps('decimal')} />
         {options.hour12 && (
           <input className={input} {...getInputProps('am/pm')} />
         )}
       </div>
       <SetOptions
-        enabled={['date', 'snapToStep', 'wrapAround', 'hour12', 'digits']}
+        enabled={[
+          'date',
+          'snapToStep',
+          'wrapAround',
+          'hour12',
+          'digits',
+          'decimalPlaces',
+        ]}
         options={options}
         updateFn={update}
       />

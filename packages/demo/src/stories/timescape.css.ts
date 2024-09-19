@@ -29,7 +29,7 @@ export const flex = style({
 export const input = style({
   fontVariantNumeric: 'tabular-nums',
   height: 'fit-content',
-  fontSize: 18,
+  fontSize: 24,
   border: 'none',
   outline: 'none',
   cursor: 'default',
@@ -156,14 +156,14 @@ const secondColor = '#f5f5f5'
 const flashAnim = keyframes({
   '0%': {
     backgroundPosition: 'right',
-    backgroundImage: `linear-gradient(white, white), 
+    backgroundImage: `linear-gradient(white, white),
                       linear-gradient(-60deg, ${baseColor}, ${secondColor}, ${baseColor})`,
     opacity: 1,
   },
   '100%': {
     backgroundPosition: 'left',
     backgroundSize: '200%',
-    backgroundImage: `linear-gradient(white, white), 
+    backgroundImage: `linear-gradient(white, white),
                       linear-gradient(120deg, ${baseColor}, ${secondColor}, ${baseColor})`,
   },
 })
