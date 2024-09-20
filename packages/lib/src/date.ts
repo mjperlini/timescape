@@ -6,6 +6,11 @@ export const isSameSeconds = (ts1: number, ts2: number) =>
 const isLeapYear = (year: number) =>
   (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0
 
+const getDecimals = (num: number, decimalPlaces: number): number => {
+  const factor = Math.pow(10, 3 - decimalPlaces)
+  return Math.round(num / factor)
+}
+
 export const daysInMonth = (date: Date) => {
   const month = date.getMonth()
   const year = date.getFullYear()
@@ -51,10 +56,9 @@ export const add = (date: Date, type: DateType, amount: number) => {
       newDate.setSeconds(newDate.getSeconds() + amount)
       break
     case 'decimal':
-      newDate.setMilliseconds(newDate.getMilliseconds() + amount * 10)
+      newDate.setMilliseconds(newDate.getMilliseconds() + amount)
       break
   }
-
   return newDate
 }
 
@@ -86,7 +90,7 @@ export const set = (date: Date, type: DateType, value: number) => {
       newDate.setSeconds(value)
       break
     case 'decimal':
-      newDate.setMilliseconds(value * 10)
+      newDate.setMilliseconds(value)
       break
     case 'am/pm':
       newDate.setHours(value)
@@ -96,7 +100,7 @@ export const set = (date: Date, type: DateType, value: number) => {
   return newDate
 }
 
-export const get = (date: Date, type: DateType) => {
+export const get = (date: Date, type: DateType, decimalPlaces = 2) => {
   switch (type) {
     case 'days':
       return date.getDate()
@@ -111,7 +115,7 @@ export const get = (date: Date, type: DateType) => {
     case 'seconds':
       return date.getSeconds()
     case 'decimal':
-      return Math.round(date.getMilliseconds() / 10)
+      return date.getMilliseconds()
     case 'am/pm':
       return date.getHours()
   }
@@ -136,6 +140,7 @@ export const format = (
   type: DateType,
   hour12?: boolean,
   digits: 'numeric' | '2-digit' = '2-digit',
+  decimalPlaces = 2,
 ) => {
   const digitCount = digits === '2-digit' ? 2 : 1
 
@@ -154,7 +159,9 @@ export const format = (
     case 'seconds':
       return String(date.getSeconds()).padStart(2, '0')
     case 'decimal':
-      return String(Math.round(date.getMilliseconds() / 10)).padStart(2, '0')
+      return String(
+        getDecimals(date.getMilliseconds(), decimalPlaces),
+      ).padStart(decimalPlaces, '0')
     case 'am/pm':
       return date.getHours() < 12 ? 'AM' : 'PM'
   }

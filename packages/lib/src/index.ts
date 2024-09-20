@@ -4,15 +4,7 @@ import {
   createPubSub,
   type Callback,
 } from './util'
-import {
-  get,
-  set,
-  add,
-  daysInMonth,
-  isSameSeconds,
-  format,
-  toggleAmPm,
-} from './date'
+import { get, set, add, daysInMonth, format, toggleAmPm } from './date'
 
 export { marry } from './range'
 
@@ -47,7 +39,7 @@ export type Options = {
   digits?: 'numeric' | '2-digit'
   wrapAround?: boolean
   snapToStep?: boolean
-  decimalPlaces: number
+  decimalPlaces?: number
 }
 
 export type RangeOptions = {
@@ -67,7 +59,7 @@ export class TimescapeManager implements Options {
   digits?: Options['digits'] = '2-digit'
   wrapAround?: Options['wrapAround'] = false
   snapToStep?: Options['snapToStep'] = false
-  decimalPlaces: Options['decimalPlaces'] = 2
+  decimalPlaces?: Options['decimalPlaces'] = 2
 
   #instanceId = Math.random().toString(36).slice(2)
   #timestamp: number | undefined
@@ -136,6 +128,12 @@ export class TimescapeManager implements Options {
       this.wrapAround = options.wrapAround
       this.decimalPlaces = options.decimalPlaces
     }
+
+    if (this.decimalPlaces === undefined) {
+      this.decimalPlaces = 2
+    }
+    this.decimalPlaces = Math.max(this.decimalPlaces, 1)
+    this.decimalPlaces = Math.min(this.decimalPlaces, 3)
 
     return new Proxy(this, {
       get: (target: this, property: keyof this & string) => {
@@ -338,20 +336,26 @@ export class TimescapeManager implements Options {
             type === 'minutes' || type === 'seconds'
               ? 2
               : type === 'decimal'
-                ? this.decimalPlaces
+                ? (this.decimalPlaces ?? 2)
                 : this.digits === '2-digit'
                   ? 2
                   : 1,
             '0',
           )
       : this.#timestamp !== undefined
-        ? format(this.#currentDate, type, this.hour12, this.digits)
+        ? format(
+            this.#currentDate,
+            type,
+            this.hour12,
+            this.digits,
+            this.decimalPlaces,
+          )
         : ''
   }
 
   #wrapDateAround(step: number, type: DateType) {
     const ranges = {
-      decimal: Math.floor(9999 / Math.pow(10, this.decimalPlaces ?? 2)),
+      decimal: 999, //Math.floor(9999 / Math.pow(10, this.decimalPlaces ?? 2)),
       seconds: 60,
       minutes: 60,
       hours: this.hour12 ? 12 : 24,
@@ -419,7 +423,7 @@ export class TimescapeManager implements Options {
 
         const elementStep = Number(inputElement.step) || 1
 
-        let step
+        let step: number
         if (this.snapToStep) {
           const value = get(date, type)
 
@@ -432,6 +436,10 @@ export class TimescapeManager implements Options {
           const factor = e.key === 'ArrowUp' ? 1 : -1
 
           step = elementStep * factor
+        }
+
+        if (type === 'decimal') {
+          step = step * Math.pow(10, 3 - (this.decimalPlaces ?? 2))
         }
 
         this.#setValidatedDate(
@@ -467,6 +475,7 @@ export class TimescapeManager implements Options {
         }
         const setValue = (unit: DateType, value: number) => {
           const newDate = set(this.#currentDate, unit, value)
+          // console.log(`setValue: ${newDate.toISOString()}`)
 
           registryEntry.intermediateValue = ''
           this.#setValidatedDate(newDate)
@@ -586,13 +595,13 @@ export class TimescapeManager implements Options {
             }
             break
           case 'decimal':
-            if (this.#cursorPosition < this.decimalPlaces) {
+            if (this.#cursorPosition < (this.decimalPlaces ?? 2)) {
               // Append the new digit and shift the digits to the left
               const newValue = intermediateValue + key
               setIntermediateValue(newValue)
               this.#cursorPosition += 1
 
-              // When we have 4 digits, update the actual year
+              // When we have enough digits, update the value
               if (this.#cursorPosition === this.decimalPlaces) {
                 setValue(
                   type,
@@ -696,7 +705,7 @@ export class TimescapeManager implements Options {
                 : type === 'minutes' || type === 'seconds'
                   ? 59
                   : type === 'decimal'
-                    ? Math.floor(9999 / Math.pow(10, this.decimalPlaces ?? 2))
+                    ? Math.floor(0.999 * Math.pow(10, this.decimalPlaces ?? 2))
                     : ''
         ).toString(),
       )

@@ -14,6 +14,9 @@ const App = () => {
 
   return (
     <div className={wrapper}>
+      <div>
+        <p>Time: {options.date?.toISOString()}</p>
+      </div>
       <div {...getRootProps()} className={root}>
         <input className={input} {...getInputProps('hours')} />
         <span className={separator}>:</span>
