@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "build": "tsup",
     "generate:demo-types": "tsc --declaration --emitDeclarationOnly --skipLibCheck --noEmit false && api-extractor run ; rm -rf dist",
-    "prepublishOnly": "pnpm test run && pnpm typecheck && pnpm build && cp ../../README.md . && cp ../../LICENSE ."
+    "prepublishOnly": "pnpm test run && pnpm typecheck && pnpm build"
   },
   "publishConfig": {
     "access": "public"

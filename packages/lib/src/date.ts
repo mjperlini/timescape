@@ -100,7 +100,7 @@ export const set = (date: Date, type: DateType, value: number) => {
   return newDate
 }
 
-export const get = (date: Date, type: DateType, decimalPlaces = 2) => {
+export const get = (date: Date, type: DateType) => {
   switch (type) {
     case 'days':
       return date.getDate()
